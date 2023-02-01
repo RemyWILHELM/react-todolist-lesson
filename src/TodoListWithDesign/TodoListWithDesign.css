@@ -1,0 +1,5 @@
+.todo-list-design{
+    margin: 1%;
+    display: flex;
+    gap: 16px;
+}
