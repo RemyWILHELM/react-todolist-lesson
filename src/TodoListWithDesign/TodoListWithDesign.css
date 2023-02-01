@@ -3,3 +3,8 @@
     display: flex;
     gap: 16px;
 }
+
+.visibility
+{
+    visibility: hidden;
+}
