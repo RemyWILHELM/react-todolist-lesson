@@ -1,6 +1,5 @@
 import { CloseOutlined, EditOutlined } from '@ant-design/icons';
 import { Button } from 'antd';
-import React from 'react';
 
 interface HeaderInterface {
     label: string;
@@ -9,6 +8,7 @@ interface HeaderInterface {
 }
 
 const Header = ({ label, onEditColumn, onDeleteColumn }: HeaderInterface) => {
+
     return (
         <div className="todo-list-column-header">
             {label}

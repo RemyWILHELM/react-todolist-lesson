@@ -1,103 +1,142 @@
-import React, {useState} from 'react';
-import AddColumn from './AddColumn';
+import React, { useState } from 'react';
+import AddColumn from './AddColumn/AddColumn';
 import AddItem from './AddItem';
-import Column from './Column';
+import ColumnComp from './Column';
+import ColumnModal from './ColumnModal';
+import ItemModal from './ItemModal';
+import './TodoListEdit.css';
 
-export interface Columns {
+export interface Column {
     value: string;
     label: string;
 }
-export interface Items {
+
+export interface Item {
     id: string;
     columnId: string;
     label: string;
 }
 
 const TodoListEdit = () => {
-
-    const [columns, setColumns] = useState<Columns[]>([]);
-    const [newColumnName, setColumnName] = useState<string>();
-    const [newItemName, setNewItemName] = useState<string>('');
-    const [newItemColumn, setNewItemColumn] = useState<string>();
-    const [items, setItems] = useState<Items[]>([]);
-    
+    const [columns, setColumns] = useState<Column[]>([]);
+    const [items, setItems] = useState<Item[]>([]);
+    const [itemModal, setItemModal] = useState<Item>();
+    const [columnModal, setColumnModal] = useState<Column>();
 
     const randomId = () => (Math.random() + 1).toString(36).substring(7);
 
-    const handleOnClickNewColumn = () => {
-        if (newColumnName) {
-            const newColumn = {
-                value: randomId(),
-                label: newColumnName,
-            };
+    const handleOnClickNewColumn = (newColumnName: string) => {
+        const newColumn = {
+            value: randomId(),
+            label: newColumnName,
+        };
 
-            setColumns([...columns, newColumn]);
-            setColumnName(undefined);
-        }
+        setColumns([...columns, newColumn]);
     };
 
-
-    const handleOnColumnNameChange = (
-        e: React.ChangeEvent<HTMLInputElement>
+    const handleOnClickNewItem = (
+        newItemName: string,
+        newItemColumn: string
     ) => {
-        setColumnName(e.target.value);
-    };
+        const newItem = {
+            id: randomId(),
+            label: newItemName,
+            columnId: newItemColumn,
+        };
 
-
-
-    const handleOnItemNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        setNewItemName(e.target.value);
-    };
-
-    const handleOnCategoryChange = (newValue: string) => {
-        setNewItemColumn(newValue);
-    };
-
-    const handleOnClickNewItem = () => {
-        if (newItemColumn) {
-            const newItem = {
-                id: randomId(),
-                label: newItemName,
-                columnId: newItemColumn,
-            };
-
-            setItems([...items, newItem]);
-
-            setNewItemName('');
-            setNewItemColumn(undefined);
-        }
-    };
-
-    const handleOnDeleteItem = (idToRemove: string) => {
-        setItems(items.filter(({ id }) => id !== idToRemove));
+        setItems([...items, newItem]);
     };
 
     const getColumnItems = (columnIdSelected: string) => {
         return items.filter(({ columnId }) => columnId === columnIdSelected);
     };
 
-    return(
-        <div className="todo-list-with-design">
-            <AddColumn 
-                clicColumn={handleOnClickNewColumn}
-                columnNameChange={handleOnColumnNameChange}
-                nameColumn={newColumnName}
-            ></AddColumn>
-            <AddItem
-                clicItem={handleOnClickNewItem}
-                itemNameChange={handleOnItemNameChange}
-                categoryChange={handleOnCategoryChange}
-                nameColumn={columns}
-                nameItem={newItemName}
-            ></AddItem>
-            <Column
-                nameColumn={columns}
-                getColumnItems={getColumnItems}
-                tabColumn={Column}
-                deleted={handleOnDeleteItem}
-            ></Column>
+    const handleOnDeleteItem = (idToRemove: string) => {
+        setItems(items.filter(({ id }) => id !== idToRemove));
+    };
+
+    const handleOnDeleteColumn = (idToRemove: string) => {
+        setColumns(columns.filter(({ value }) => value !== idToRemove));
+        setItems(items.filter(({ columnId }) => columnId !== idToRemove));
+    };
+
+    const handleOnEditItem = (idItem: string) => {
+        const item = items.find(({ id }) => id === idItem);
+
+        if (item) {
+            setItemModal(item);
+        }
+    };
+
+    const handleOnEditColumn = (idColumn: string) => {
+        const column = columns.find(({ value }) => value === idColumn);
+
+        if (column) {
+            setColumnModal(column);
+        }
+    };
+
+    const handleOnCloseItem = () => {
+        setItemModal(undefined);
+    };
+
+    const handleOnCloseColumn = () => {
+        setColumnModal(undefined);
+    };
+
+    const handleOnSaveItem = (newItem: Item) => {
+        setItems(
+            items.map((item) => (item.id === newItem.id ? newItem : item))
+        );
+        handleOnCloseItem();
+    };
+
+    const handleOnSaveColumn = (newColumn: Column) => {
+        setColumns(
+            columns.map((column) =>
+                column.value === newColumn.value ? newColumn : column
+            )
+        );
+        handleOnCloseColumn();
+    };
+
+    return (
+        <div className="todo-list-edit">
+            <AddColumn onClickNewColumn={handleOnClickNewColumn} />
+            <AddItem onClickNewItem={handleOnClickNewItem} columns={columns} />
+
+            <div className="todo-list-edit-columns">
+                {columns.map(({ value, label }) => {
+                    const columnItems = getColumnItems(value);
+
+                    return (
+                        <ColumnComp
+                            value={value}
+                            label={label}
+                            columnItems={columnItems}
+                            onDeleteItem={handleOnDeleteItem}
+                            onEditItem={handleOnEditItem}
+                            onEditColumn={handleOnEditColumn}
+                            onDeleteColumn={handleOnDeleteColumn}
+                        />
+                    );
+                })}
+            </div>
+
+            <ItemModal
+                item={itemModal}
+                onCloseItem={handleOnCloseItem}
+                onSaveItem={handleOnSaveItem}
+                columns={columns}
+            />
+
+            <ColumnModal
+                column={columnModal}
+                onCloseColumn={handleOnCloseColumn}
+                onSaveColumn={handleOnSaveColumn}
+            />
         </div>
-    )
+    );
 };
 
 export default TodoListEdit;

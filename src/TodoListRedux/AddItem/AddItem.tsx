@@ -1,15 +1,16 @@
 import React, { useState } from 'react';
 import { Button, Input, Select } from 'antd';
-import { Column } from '../TodoListEdit';
+import {useDispatch, useSelector} from "react-redux";
+import {State} from "../store";
+import {addItem} from "../TodoListSlice";
 
-interface AddItemInterface {
-    onClickNewItem(newItemName: string, newItemColumn: string): void;
-    columns: Column[];
-}
 
-const AddItem = ({ onClickNewItem, columns }: AddItemInterface) => {
+const AddItem = () => {
     const [newItemName, setNewItemName] = useState<string>('');
     const [newItemColumn, setNewItemColumn] = useState<string>();
+
+    const dispatch = useDispatch()
+    const columnsName = useSelector((state : State) => state.slice.columns.map(column => ({ value: column.value, label: column.label })));
 
     const handleOnItemNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         setNewItemName(e.target.value);
@@ -20,7 +21,7 @@ const AddItem = ({ onClickNewItem, columns }: AddItemInterface) => {
     };
 
     const handleOnClickNewItem = () => {
-        onClickNewItem(newItemName, newItemColumn as string);
+        dispatch(addItem([newItemName, newItemColumn as string]))
 
         setNewItemName('');
         setNewItemColumn(undefined);
@@ -38,7 +39,7 @@ const AddItem = ({ onClickNewItem, columns }: AddItemInterface) => {
                 placeholder="Select column"
                 onChange={handleOnCategoryChange}
                 value={newItemColumn}
-                options={columns}
+                options={columnsName}
             />
 
             <Button

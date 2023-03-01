@@ -1,19 +1,21 @@
 import { Input, Modal } from 'antd';
 import React, { useEffect, useState } from 'react';
-import { Column } from '../TodoListEdit';
+import { Column } from '../TodoListRedux/TodoListRedux';
+import {useSelector} from "react-redux";
+import {State} from "../store";
 
 interface ColumnModalInterface {
-    column: Column | undefined;
     onCloseColumn(): void;
     onSaveColumn(newColumn: Column): void;
 }
 
 const ColumnModal = ({
-    column,
     onCloseColumn,
     onSaveColumn,
 }: ColumnModalInterface) => {
     const [newColumnName, setNewColumnName] = useState<string>();
+
+    const column = useSelector((state : State) => state.slice.columnModal)
 
     useEffect(() => {
         setNewColumnName(column?.label);
@@ -35,7 +37,7 @@ const ColumnModal = ({
     return (
         <Modal
             title="Column edition"
-            open={column !== undefined}
+            open={column !== null}
             onOk={handleOnSave}
             okText="Save"
             onCancel={onCloseColumn}

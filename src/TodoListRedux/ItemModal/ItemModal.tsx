@@ -1,22 +1,24 @@
 import { Input, Modal, Select } from 'antd';
 import React, { useEffect, useState } from 'react';
-import { Column, Item } from '../TodoListEdit';
+import { Column, Item } from '../TodoListRedux/TodoListRedux';
+import {useSelector} from "react-redux";
+import {State} from "../store";
 
 interface ItemModalInterface {
-    item: Item | undefined;
     columns: Column[];
     onCloseItem(): void;
     onSaveItem(newItem: Item): void;
 }
 
 const ItemModal = ({
-    item,
     onCloseItem,
     onSaveItem,
     columns,
 }: ItemModalInterface) => {
     const [newItemName, setNewItemName] = useState<string>();
     const [newItemColumn, setNewItemColumn] = useState<string>();
+
+    const item = useSelector((state : State) => state.slice.itemModal)
 
     useEffect(() => {
         setNewItemName(item?.label);
@@ -44,7 +46,7 @@ const ItemModal = ({
     return (
         <Modal
             title="Item edition"
-            open={item !== undefined}
+            open={item !== null}
             onOk={handleOnSave}
             okText="Save"
             onCancel={onCloseItem}
